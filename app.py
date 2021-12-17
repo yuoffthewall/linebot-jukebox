@@ -7,13 +7,15 @@ from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 
-from fsm import TocMachine
+from fsm import setMachine
+import utils
 from utils import send_text_message
+import spotify
 
 load_dotenv()
 
 
-machine = TocMachine(
+machine = setMachine(
     states=["user", "state1", "state2"],
     transitions=[
         {
@@ -54,59 +56,61 @@ parser = WebhookParser(channel_secret)
 
 @app.route("/callback", methods=["POST"])
 def callback():
-    signature = request.headers["X-Line-Signature"]
-    # get request body as text
-    body = request.get_data(as_text=True)
-    app.logger.info("Request body: " + body)
+	signature = request.headers["X-Line-Signature"]
+	# get request body as text
+	body = request.get_data(as_text=True)
+	app.logger.info("Request body: " + body)
 
-    # parse webhook body
-    try:
-        events = parser.parse(body, signature)
-    except InvalidSignatureError:
-        abort(400)
+	# parse webhook body
+	try:
+		events = parser.parse(body, signature)
+	except InvalidSignatureError:
+		abort(400)
 
-    # if event is MessageEvent and message is TextMessage, then echo text
-    for event in events:
-        if not isinstance(event, MessageEvent):
-            continue
-        if not isinstance(event.message, TextMessage):
-            continue
+	# if event is MessageEvent and message is TextMessage, then echo text
+	for event in events:
+		if not isinstance(event, MessageEvent):
+			continue
+		if not isinstance(event.message, TextMessage):
+			continue
 
-        line_bot_api.reply_message(
-            event.reply_token, TextSendMessage(text=event.message.text)
-        )
+		utils.send_button_message(event.source.user_id, ['1','2'] )
+		'''
+		line_bot_api.reply_message(
+			event.reply_token, TextSendMessage(text=event.message.text)
+		)	'''
 
-    return "OK"
+	return "OK"
 
 
 @app.route("/webhook", methods=["POST"])
 def webhook_handler():
-    signature = request.headers["X-Line-Signature"]
-    # get request body as text
-    body = request.get_data(as_text=True)
-    app.logger.info(f"Request body: {body}")
+	signature = request.headers["X-Line-Signature"]
+	# get request body as text
+	body = request.get_data(as_text=True)
+	app.logger.info(f"Request body: {body}")
 
-    # parse webhook body
-    try:
-        events = parser.parse(body, signature)
-    except InvalidSignatureError:
-        abort(400)
+	# parse webhook body
+	try:
+		events = parser.parse(body, signature)
+	except InvalidSignatureError:
+		abort(400)
 
-    # if event is MessageEvent and message is TextMessage, then echo text
-    for event in events:
-        if not isinstance(event, MessageEvent):
-            continue
-        if not isinstance(event.message, TextMessage):
-            continue
-        if not isinstance(event.message.text, str):
-            continue
-        print(f"\nFSM STATE: {machine.state}")
-        print(f"REQUEST BODY: \n{body}")
-        response = machine.advance(event)
-        if response == False:
-            send_text_message(event.reply_token, "Not Entering any State")
+	# if event is MessageEvent and message is TextMessage, then echo text
+	for event in events:
+		if not isinstance(event, MessageEvent):
+			continue
+		if not isinstance(event.message, TextMessage):
+			continue
+		if not isinstance(event.message.text, str):
+			continue
+		print(f"\nFSM STATE: {machine.state}")
+		print(f"REQUEST BODY: \n{body}")
+		response = machine.advance(event)
+		if response == False:
+			send_text_message(event.reply_token, "Not Entering any State")
 
-    return "OK"
+	return "OK"
 
 
 @app.route("/show-fsm", methods=["GET"])
