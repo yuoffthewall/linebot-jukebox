@@ -7,13 +7,13 @@ from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 
-from fsm import setMachine
+from fsm import setMachine, create_machine
 import utils
 from utils import send_text_message
-import spotify
 
 load_dotenv()
 
+machines = {}
 
 machine = setMachine(
     states=["user", "state1", "state2"],
@@ -74,11 +74,19 @@ def callback():
 		if not isinstance(event.message, TextMessage):
 			continue
 
-		utils.send_button_message(event.source.user_id, ['1','2'] )
 		'''
 		line_bot_api.reply_message(
 			event.reply_token, TextSendMessage(text=event.message.text)
 		)	'''
+		# Create a machine for new user
+		if event.source.user_id not in machines:
+			machines[event.source.user_id] = create_machine()
+
+		# Advance the FSM for each MessageEvent
+		response = machines[event.source.user_id].move(event)
+		if response == False:
+			send_text_message(event.reply_token, "Invalid command, try again")
+
 
 	return "OK"
 
@@ -106,7 +114,7 @@ def webhook_handler():
 			continue
 		print(f"\nFSM STATE: {machine.state}")
 		print(f"REQUEST BODY: \n{body}")
-		response = machine.advance(event)
+		response = machine.move(event)
 		if response == False:
 			send_text_message(event.reply_token, "Not Entering any State")
 
