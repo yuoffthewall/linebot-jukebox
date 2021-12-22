@@ -1,6 +1,6 @@
 from transitions.extensions import GraphMachine
 
-from utils import send_text_message, send_button_message
+from utils import send_text_message, send_button_message, send_image_carousel
 import spotify as sp
 
 class setMachine(GraphMachine):
@@ -11,21 +11,34 @@ class setMachine(GraphMachine):
 		return True
 	
 	def on_enter_ask(self, event):
-		send_button_message(event.source.user_id, ["Hell yeah", "Nah, thanks"])	
+		title = "DJ linebot in the house"
+		text = "Got some good shit here. You want some?"
+		send_button_message(event.source.user_id, title, text, ["Hell yeah", "Nah, thanks"])	
 
 	def is_goto_options(self, event):
 		text = event.message.text
 		return text.lower() == "hell yeah"
 
 	def on_enter_options(self, event):
-		send_button_message(event.source.user_id, ["artists", "vibes", "songs"])	
+		title = "Here's the order options!"
+		text = "You can order songs accroding to artists, vibes or songs."
+		send_button_message(event.source.user_id, title, text, ["artists", "vibes", "songs"])	
 
 	def is_goto_vibes(self, event):
 		text = event.message.text
 		return text.lower() == "vibes"
 
 	def on_enter_vibes(self, event):
-		send_button_message(event.source.user_id, ["hiphop", "rock"])	
+		options = ['hiphop', 'rock', 'rnb']
+		results = sp.get_categories(options)
+		send_image_carousel(event.source.user_id, results)	
+	
+	def on_exit_vibes(self, event):
+		category = event.message.text
+		list_id = sp.get_catagory_playlists(category)[1]
+		tracks = sp.get_playlist_tracks(list_id)[:30]
+		sp.create_playlist(sp.myid, tracks)
+
 
 	def is_goto_artists(self, event):
 		text = event.message.text
@@ -53,13 +66,27 @@ class setMachine(GraphMachine):
 		text = event.message.text
 		return text.lower() == "songs"
 
+	def on_enter_songs(self, event):
+		msg = "Please give me the artists list.\nOne artist per line."
+		send_text_message(event.reply_token, msg)
 
-		reply_token = event.reply_token
-		send_text_message(reply_token, "Trigger state1")
-		#self.go_back()
-
-	def on_exit_vibes(self):
-		print("Leaving state1")
+	def on_exit_songs(self, event):
+		names = event.message.text.split("\n")
+		tracks = []
+		for name in names:
+			track = sp.search(name, type="track")['tracks']['items'][0]['id']
+			tracks.append(track)
+		sp.create_playlist(sp.myid, tracks)
+	
+	def is_invalid(self, event):
+		if self.state == 'ask':
+			return not self.is_goto_options(event)
+		elif self.state == 'options':
+			options = ['vibes', 'artists', 'songs']
+			return options.count(event.message.text) == 0
+		elif self.state == 'vibes':
+			options = ['hiphop', 'rock', 'rnb']
+			return options.count(event.message.text) == 0
 
 	def on_enter_state2(self, event):
 		print("I'm entering state2")
@@ -68,8 +95,6 @@ class setMachine(GraphMachine):
 		send_text_message(reply_token, "Trigger state2")
 		self.go_back()
 
-	def on_exit_state2(self):
-		print("Leaving state2")
 
 
 def create_machine():
@@ -111,11 +136,10 @@ def create_machine():
 				"source": ["ask", "options", "vibes"],
 				"dest": "=",
 				"conditions": "is_invalid",
-				"after": "repeat",
 			},
 			{
 				"trigger": "move",
-				"source": ["artists", "songs"],
+				"source": ["artists", "songs", "vibes"],
 				"dest": "ask",
 			},
 			{

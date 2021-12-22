@@ -16,7 +16,7 @@ def send_text_message(reply_token, text):
 
     return "OK"
 
-def send_button_message(id, options):
+def send_button_message(id, title, text, options):
 	my_actions = []
 	for option in options:
 		my_actions.append( MessageTemplateAction(label=option, text=option) )
@@ -24,14 +24,35 @@ def send_button_message(id, options):
 		alt_text='Buttons template',
 		template=ButtonsTemplate(
 			thumbnail_image_url='https://example.com/image.jpg',
-			title='Menu',
-			text='Please select',
+			title=title,
+			text=text,
 			actions=my_actions
 		)
 	)
 
 	line_bot_api.push_message(id, message)
 	return "OK"
+
+def send_image_carousel(id, options):
+    cols = []
+    for option in options:
+        cols.append(
+            ImageCarouselColumn(
+                image_url=option['icons'][0]['url'],
+                action=MessageTemplateAction(
+					label=option['name'],
+                    text=option['id'],
+                )
+            )
+        )
+    message = TemplateSendMessage(
+        alt_text='ImageCarousel template',
+        template=ImageCarouselTemplate(columns=cols)
+    )
+    line_bot_api.push_message(id, message)
+    return "OK"
+
+
 """
 def send_image_url(id, img_url):
     pass

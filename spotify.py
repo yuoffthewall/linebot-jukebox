@@ -34,7 +34,7 @@ def search_aritst_top_tracks(artist):
 
 #
 def create_playlist(user_id, tracks):
-	playlist = sp.user_playlist_create(user_id, "test", public=False)
+	playlist = sp.user_playlist_create(user_id, "dailyMix", public=False)
 	sp.user_playlist_add_tracks(user_id, playlist['id'], tracks)
 
 #
@@ -46,9 +46,18 @@ def search_artist(artist_id):
 	result = sp.artist(artist_id)
 
 #
-def get_categories():
-	result = sp.categories()
-	return result['categories']['items']
+def get_categories(options):
+	result = sp.categories(limit=50)['categories']['items']
+	info = []
+	count = 0;
+	for c in result:
+		id = c['id']
+		if options.count(id) > 0:
+			info.append(c)
+			count+=1
+		if count == len(options): break
+
+	return info
 
 #
 def get_catagory_playlists(category):
@@ -67,7 +76,7 @@ def get_playlist_tracks(playlist):
 	return tracks
 
 if __name__ == '__main__':
-	list_id = get_catagory_playlists("rock")[1]
-	result = get_playlist_tracks(list_id)
-	#print(result)
-	print(json.dumps(result, indent=4))
+	result = get_categories(['hiphop', 'rnb'])
+	#list_id = get_catagory_playlists("hiphop")[1]
+	#result = get_playlist_tracks(list_id)
+	print(json.dumps(result[1], indent=4))
