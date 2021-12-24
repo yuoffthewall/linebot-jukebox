@@ -1,8 +1,6 @@
-myid='21pms7hjn5mfszuxggxdzlgcy'
-
 import spotipy
 import os
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyOAuth, SpotifyImplicitGrant
 from dotenv import load_dotenv
 import json
 
@@ -14,7 +12,8 @@ Redirect_uri = os.getenv("Redirect_uri", None)
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=Client_id,
                                                client_secret=Client_secret,
                                                redirect_uri=Redirect_uri,
-                                               scope="user-library-read playlist-modify-private"))
+                                               scope="user-library-read playlist-modify-private playlist-modify-public"))
+
 def show_my_tracks():
 	results = sp.current_user_saved_tracks()
 	for idx, item in enumerate(results['items']):
@@ -34,8 +33,9 @@ def search_aritst_top_tracks(artist):
 
 #
 def create_playlist(user_id, tracks):
-	playlist = sp.user_playlist_create(user_id, "dailyMix", public=False)
+	playlist = sp.user_playlist_create(user_id, "dailyMix", public=True, collaborative=False)
 	sp.user_playlist_add_tracks(user_id, playlist['id'], tracks)
+	return playlist
 
 #
 def search(search_str, type):
@@ -47,7 +47,7 @@ def search_artist(artist_id):
 
 #
 def get_categories(options):
-	result = sp.categories(limit=50)['categories']['items']
+	result = sp.categories(limit=50, country='US')['categories']['items']
 	info = []
 	count = 0;
 	for c in result:
@@ -61,7 +61,7 @@ def get_categories(options):
 
 #
 def get_catagory_playlists(category):
-	result = sp.category_playlists(category)
+	result = sp.category_playlists(category, country='US')
 	list_ids = []
 	for playlist in result['playlists']['items']:
 		list_ids.append(playlist['id'])
@@ -76,7 +76,5 @@ def get_playlist_tracks(playlist):
 	return tracks
 
 if __name__ == '__main__':
-	result = get_categories(['hiphop', 'rnb'])
-	#list_id = get_catagory_playlists("hiphop")[1]
-	#result = get_playlist_tracks(list_id)
-	print(json.dumps(result[1], indent=4))
+	result = sp.categories(limit=50, country='US')['categories']['items']
+	print(json.dumps(result, indent=4))

@@ -23,7 +23,7 @@ def send_button_message(id, title, text, options):
 	message = TemplateSendMessage(
 		alt_text='Buttons template',
 		template=ButtonsTemplate(
-			thumbnail_image_url='https://example.com/image.jpg',
+			thumbnail_image_url='https://play-lh.googleusercontent.com/zim-eMjkFdDeXUKv1dLiFuWgsUvy1cIdAJbOJDY7pg1P27A0TdyWxRXv1v0AO4Vn9gg',
 			title=title,
 			text=text,
 			actions=my_actions
