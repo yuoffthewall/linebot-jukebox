@@ -6,10 +6,10 @@ import spotify as sp
 class setMachine(GraphMachine):
 	def __init__(self, **machine_configs):
 		self.machine = GraphMachine(model=self, **machine_configs)
-		self.user_id = ''
 		self.link = ''
 		self.vibes = ['hiphop', 'chill', 'rock', 'rnb', 'kpop', 'at_home', 'party']
 
+	'''
 	def is_goto_initial(self, event):
 		return True
 
@@ -26,11 +26,15 @@ class setMachine(GraphMachine):
 					"Please provide your spotify id to get started!")
 			return False
 		return True
+	'''
+	def is_goto_ask(self, event):
+		return True
 	
 	def on_enter_ask(self, event):
 		title = "DJ linebot in the house"
 		text = "Got some good shit here. You want some?"
 		send_button_message(event.source.user_id, title, text, ["Hell yeah!", "Nah, thanks"])	
+
 
 	def is_goto_options(self, event):
 		text = event.message.text
@@ -40,6 +44,7 @@ class setMachine(GraphMachine):
 		title = "Here's the order options!"
 		text = "You can order songs accroding to artists, vibes or songs."
 		send_button_message(event.source.user_id, title, text, ["vibes", "artists", "songs"])	
+
 
 	def is_goto_vibes(self, event):
 		text = event.message.text
@@ -59,7 +64,7 @@ class setMachine(GraphMachine):
 		category = event.message.text
 		list_id = sp.get_catagory_playlists(category)[0]
 		tracks = sp.get_playlist_tracks(list_id)[:30]
-		playlist = sp.create_playlist(self.user_id, tracks)
+		playlist = sp.create_playlist(sp.user_id, tracks)
 		self.link = playlist['external_urls']['spotify']
 		self.send_link(event)
 
@@ -82,7 +87,7 @@ class setMachine(GraphMachine):
 		tracks = []
 		for artist in artists:
 			tracks += sp.search_aritst_top_tracks(artist)
-		playlist = sp.create_playlist(self.user_id, tracks)
+		playlist = sp.create_playlist(sp.user_id, tracks)
 		self.link = playlist['external_urls']['spotify']
 		self.send_link(event)
 		
@@ -102,14 +107,12 @@ class setMachine(GraphMachine):
 		for name in names:
 			track = sp.search(name, type="track")['tracks']['items'][0]['id']
 			tracks.append(track)
-		playlist = sp.create_playlist(self.user_id, tracks)
+		playlist = sp.create_playlist(sp.user_id, tracks)
 		self.link = playlist['external_urls']['spotify']
 		self.send_link(event)
 	
 	def is_invalid(self, event):
-		if self.state == 'initial':
-			return not self.is_goto_ask(event)
-		elif self.state == 'ask':
+		if self.state == 'ask':
 			return not self.is_goto_options(event)
 		elif self.state == 'options':
 			options = ['vibes', 'artists', 'songs']
@@ -117,32 +120,28 @@ class setMachine(GraphMachine):
 		elif self.state == 'vibes':
 			return self.vibes.count(event.message.text) == 0
 
-	def on_enter_state2(self, event):
-		print("I'm entering state2")
-
-		reply_token = event.reply_token
-		send_text_message(reply_token, "Trigger state2")
-		self.go_back()
-
 	def send_link(self, event):
 		text = ("Your daily mix has been created!\n"+
 				"here's the link:\n"+
 				self.link)
 		send_text_message(event.reply_token, text)
 
+	'''
+	def on_enter_state2(self, event):
+		print("I'm entering state2")
+
+		reply_token = event.reply_token
+		send_text_message(reply_token, "Trigger state2")
+		self.go_back()
+	'''
+
 def create_machine():
 	machine = setMachine(
-		states=["initial", "ask", "options", "vibes", "artists", "songs"],
+		states=["user", "ask", "options", "vibes", "artists", "songs"],
 		transitions=[
 			{
 				"trigger": "move",
 				"source": "user",
-				"dest": "initial",
-				"conditions": "is_goto_initial",
-			},
-			{
-				"trigger": "move",
-				"source": "initial",
 				"dest": "ask",
 				"conditions": "is_goto_ask",
 			},
@@ -178,7 +177,7 @@ def create_machine():
 			},
 			{
 				"trigger": "move",
-				"source": ["initial", "ask", "options", "vibes"],
+				"source": ["ask", "options", "vibes"],
 				"dest": "=",
 				"conditions": "is_invalid",
 			},
@@ -189,7 +188,7 @@ def create_machine():
 			},
 			{
 				"trigger": "invalid",
-				"source": ["initial", "ask", "options", "vibes"],
+				"source": ["ask", "options", "vibes"],
 				"dest": "=",
 			},
 			{

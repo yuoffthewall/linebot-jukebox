@@ -1,6 +1,6 @@
 import spotipy
 import os
-from spotipy.oauth2 import SpotifyOAuth, SpotifyImplicitGrant
+from spotipy.oauth2 import SpotifyOAuth, SpotifyImplicitGrant, SpotifyPKCE
 from dotenv import load_dotenv
 import json
 
@@ -8,11 +8,20 @@ load_dotenv()
 Client_id = os.getenv("Client_id", None)
 Client_secret = os.getenv("Client_secret", None)
 Redirect_uri = os.getenv("Redirect_uri", None)
+user_id = os.getenv("User_id", None)
+
+print(Client_id)
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=Client_id,
                                                client_secret=Client_secret,
                                                redirect_uri=Redirect_uri,
                                                scope="user-library-read playlist-modify-private playlist-modify-public"))
+'''
+sp = spotipy.Spotify(auth_manager=SpotifyPKCE(client_id=Client_id,
+                                               redirect_uri=Redirect_uri,
+											   #cache_path='.cache',
+                                               scope="user-library-read playlist-modify-private playlist-modify-public"))
+'''
 
 def show_my_tracks():
 	results = sp.current_user_saved_tracks()
@@ -25,7 +34,7 @@ def search_aritst_top_tracks(artist):
 	results = sp.artist_top_tracks(artist)
 	msg = ""
 	tracklist = []
-	for track in results['tracks'][:5]:
+	for track in results['tracks'][:10]:
 		msg = msg+track['name']+'\n'
 		print(track['name'])
 		tracklist.append(track['uri'])
@@ -76,5 +85,4 @@ def get_playlist_tracks(playlist):
 	return tracks
 
 if __name__ == '__main__':
-	result = sp.categories(limit=50, country='US')['categories']['items']
-	print(json.dumps(result, indent=4))
+	result = sp.categories()
