@@ -42,8 +42,8 @@ class setMachine(GraphMachine):
 
 	def on_enter_options(self, event):
 		title = "Here's the order options!"
-		text = "You can order songs accroding to artists, vibes or songs."
-		send_button_message(event.source.user_id, title, text, ["vibes", "artists", "songs"])	
+		text = "You can order tracks accroding to artists, vibes or tracks."
+		send_button_message(event.source.user_id, title, text, ["vibes", "artists", "tracks"])	
 
 
 	def is_goto_vibes(self, event):
@@ -74,7 +74,8 @@ class setMachine(GraphMachine):
 		return text.lower() == "artists"
 
 	def on_enter_artists(self, event):
-		msg = "Please give me the artists list.\nOne artist per line."
+		msg = ("Please give me the artists list.\nOne artist per line.\n"+
+				"For example:\n\nKendrick Lamar\nTravis scott\nJay Chou")
 		send_text_message(event.reply_token, msg)
 
 	def on_exit_artists(self, event):
@@ -95,10 +96,11 @@ class setMachine(GraphMachine):
 
 	def is_goto_songs(self, event):
 		text = event.message.text
-		return text.lower() == "songs"
+		return text.lower() == "tracks"
 
 	def on_enter_songs(self, event):
-		msg = "Please give me the artists list.\nOne artist per line."
+		msg = ("Please give me the tracks list.\nOne track per line.\n"+
+				"For example:\n\nHumble\nDNA\nMoney Trees")
 		send_text_message(event.reply_token, msg)
 
 	def on_exit_songs(self, event):
@@ -115,7 +117,7 @@ class setMachine(GraphMachine):
 		if self.state == 'ask':
 			return not self.is_goto_options(event)
 		elif self.state == 'options':
-			options = ['vibes', 'artists', 'songs']
+			options = ['vibes', 'artists', 'tracks']
 			return options.count(event.message.text) == 0
 		elif self.state == 'vibes':
 			return self.vibes.count(event.message.text) == 0

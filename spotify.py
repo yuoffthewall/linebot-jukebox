@@ -10,8 +10,6 @@ Client_secret = os.getenv("Client_secret", None)
 Redirect_uri = os.getenv("Redirect_uri", None)
 user_id = os.getenv("User_id", None)
 
-print(Client_id)
-
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=Client_id,
                                                client_secret=Client_secret,
                                                redirect_uri=Redirect_uri,
