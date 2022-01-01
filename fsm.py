@@ -189,14 +189,9 @@ def create_machine():
 				"dest": "ask",
 			},
 			{
-				"trigger": "invalid",
-				"source": ["ask", "options", "vibes"],
-				"dest": "=",
-			},
-			{
 				"trigger": "go_back", 
-				"source": ["ask", "options", "vibes", "artists", "songs"], 
-				"dest": "initial",
+				"source": ["options", "vibes", "artists", "songs"], 
+				"dest": "ask",
 			},
 		],
 		initial="user",
