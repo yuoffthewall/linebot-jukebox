@@ -7,7 +7,8 @@ class setMachine(GraphMachine):
     def __init__(self, **machine_configs):
         self.machine = GraphMachine(model=self, **machine_configs)
         self.link = ''
-        self.vibes = ['hiphop', 'chill', 'rock', 'rnb', 'kpop', 'at_home', 'party']
+        self.vibes = ['Hip-Hop', 'Chill', 'Rock', 'R&B', 'K-Pop', 'At Home', 'Party']
+        self.vibes_info = sp.get_categories(self.vibes)
 
     '''
     def is_goto_initial(self, event):
@@ -51,17 +52,22 @@ class setMachine(GraphMachine):
         return text.lower() == "vibes"
 
     def on_enter_vibes(self, event):
-        results = sp.get_categories(self.vibes)
-        send_image_carousel(event.source.user_id, results)    
+        send_image_carousel(event.source.user_id, self.vibes_info)
 
     def valid_vibes(self, event):
         return self.vibes.count(event.message.text) > 0
     
     def on_exit_vibes(self, event):
+        if event.message.text == "Back":
+            return
         if not self.valid_vibes(event):
             send_text_message(event.reply_token, "Invalid choice!")
             return
         category = event.message.text
+        for info in self.vibes_info:
+            if info['name'] == category:
+                category = info['id']
+                break
         list_id = sp.get_catagory_playlists(category)[0]
         tracks = sp.get_playlist_tracks(list_id)[:30]
         playlist = sp.create_playlist(sp.user_id, tracks)
@@ -79,6 +85,8 @@ class setMachine(GraphMachine):
         send_text_message(event.reply_token, msg)
 
     def on_exit_artists(self, event):
+        if event.message.text == "Back":
+            return
         names = event.message.text.split("\n")
         artists = []
         for name in names:
@@ -104,6 +112,8 @@ class setMachine(GraphMachine):
         send_text_message(event.reply_token, msg)
 
     def on_exit_songs(self, event):
+        if event.message.text == "Back":
+            return
         names = event.message.text.split("\n")
         tracks = []
         for name in names:
@@ -112,15 +122,22 @@ class setMachine(GraphMachine):
         playlist = sp.create_playlist(sp.user_id, tracks)
         self.link = playlist['external_urls']['spotify']
         self.send_link(event)
+
+    def is_go_back(self, event):
+        return event.message.text == "Back"
     
     def is_invalid(self, event):
+        text = event.message.text
+        if text == "Back":
+            return False
+
         if self.state == 'ask':
             return not self.is_goto_options(event)
         elif self.state == 'options':
             options = ['vibes', 'artists', 'tracks']
-            return options.count(event.message.text) == 0
+            return options.count(text) == 0
         elif self.state == 'vibes':
-            return self.vibes.count(event.message.text) == 0
+            return self.vibes.count(text) == 0
 
     def send_link(self, event):
         text = ("Your daily mix has been created!\n"+
@@ -189,9 +206,10 @@ def create_machine():
                 "dest": "ask",
             },
             {
-                "trigger": "go_back", 
-                "source": ["options", "vibes", "artists", "songs"], 
+                "trigger": "move",
+                "source": ["ask", "options", "vibes", "artists", "songs"],
                 "dest": "ask",
+                "conditions" : "is_go_back"
             },
         ],
         initial="user",

@@ -41,7 +41,7 @@ def send_image_carousel(id, options):
                 image_url=option['icons'][0]['url'],
                 action=MessageTemplateAction(
                     label=option['name'],
-                    text=option['id'],
+                    text=option['name'],
                 )
             )
         )

@@ -54,13 +54,13 @@ def search_artist(artist_id):
 
 #
 def get_categories(options):
-    result = sp.categories(limit=50, country='US')['categories']['items']
+    results = sp.categories(limit=50, country='US')['categories']['items']
     info = []
     count = 0;
-    for c in result:
-        id = c['id']
-        if options.count(id) > 0:
-            info.append(c)
+    for result in results:
+        name = result['name']
+        if options.count(name) > 0:
+            info.append(result)
             count+=1
         if count == len(options): break
 
