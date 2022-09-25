@@ -10,24 +10,6 @@ class setMachine(GraphMachine):
         self.vibes = ['Hip-Hop', 'Chill', 'Rock', 'R&B', 'K-Pop', 'At Home', 'Party']
         self.vibes_info = sp.get_categories(self.vibes)
 
-    '''
-    def is_goto_initial(self, event):
-        return True
-
-    def on_enter_initial(self, event):
-        text = "Please provide your spotify id to get started!"
-        send_text_message(event.reply_token, text)
-
-    def is_goto_ask(self, event):
-        self.user_id = event.message.text
-        try:
-            result = sp.sp.user(self.user_id)
-        except:
-            send_text_message(event.reply_token, "Invalid id!\n"+
-                    "Please provide your spotify id to get started!")
-            return False
-        return True
-    '''
     def is_goto_ask(self, event):
         return True
     
@@ -144,15 +126,6 @@ class setMachine(GraphMachine):
                 "here's the link:\n"+
                 self.link)
         send_text_message(event.reply_token, text)
-
-    '''
-    def on_enter_state2(self, event):
-        print("I'm entering state2")
-
-        reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state2")
-        self.go_back()
-    '''
 
 def create_machine():
     machine = setMachine(

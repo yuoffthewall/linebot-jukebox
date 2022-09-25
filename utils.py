@@ -51,12 +51,3 @@ def send_image_carousel(id, options):
     )
     line_bot_api.push_message(id, message)
     return "OK"
-
-
-"""
-def send_image_url(id, img_url):
-    pass
-
-def send_button_message(id, text, buttons):
-    pass
-"""

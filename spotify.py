@@ -14,12 +14,6 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=Client_id,
                                                client_secret=Client_secret,
                                                redirect_uri=Redirect_uri,
                                                scope="user-library-read playlist-modify-private playlist-modify-public"))
-'''
-sp = spotipy.Spotify(auth_manager=SpotifyPKCE(client_id=Client_id,
-                                               redirect_uri=Redirect_uri,
-                                               #cache_path='.cache',
-                                               scope="user-library-read playlist-modify-private playlist-modify-public"))
-'''
 
 def show_my_tracks():
     results = sp.current_user_saved_tracks()
