@@ -17,21 +17,21 @@ def send_text_message(reply_token, text):
     return "OK"
 
 def send_button_message(id, title, text, options):
-	my_actions = []
-	for option in options:
-		my_actions.append( MessageTemplateAction(label=option, text=option) )
-	message = TemplateSendMessage(
-		alt_text='Buttons template',
-		template=ButtonsTemplate(
-			thumbnail_image_url='https://play-lh.googleusercontent.com/zim-eMjkFdDeXUKv1dLiFuWgsUvy1cIdAJbOJDY7pg1P27A0TdyWxRXv1v0AO4Vn9gg',
-			title=title,
-			text=text,
-			actions=my_actions
-		)
-	)
+    my_actions = []
+    for option in options:
+        my_actions.append( MessageTemplateAction(label=option, text=option) )
+    message = TemplateSendMessage(
+        alt_text='Buttons template',
+        template=ButtonsTemplate(
+            thumbnail_image_url='https://play-lh.googleusercontent.com/zim-eMjkFdDeXUKv1dLiFuWgsUvy1cIdAJbOJDY7pg1P27A0TdyWxRXv1v0AO4Vn9gg',
+            title=title,
+            text=text,
+            actions=my_actions
+        )
+    )
 
-	line_bot_api.push_message(id, message)
-	return "OK"
+    line_bot_api.push_message(id, message)
+    return "OK"
 
 def send_image_carousel(id, options):
     cols = []
@@ -40,7 +40,7 @@ def send_image_carousel(id, options):
             ImageCarouselColumn(
                 image_url=option['icons'][0]['url'],
                 action=MessageTemplateAction(
-					label=option['name'],
+                    label=option['name'],
                     text=option['id'],
                 )
             )

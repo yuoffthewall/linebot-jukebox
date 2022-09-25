@@ -17,70 +17,70 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=Client_id,
 '''
 sp = spotipy.Spotify(auth_manager=SpotifyPKCE(client_id=Client_id,
                                                redirect_uri=Redirect_uri,
-											   #cache_path='.cache',
+                                               #cache_path='.cache',
                                                scope="user-library-read playlist-modify-private playlist-modify-public"))
 '''
 
 def show_my_tracks():
-	results = sp.current_user_saved_tracks()
-	for idx, item in enumerate(results['items']):
-		track = item['track']
-		print(idx, track['artists'][0]['name'], " – ", track['name'])
+    results = sp.current_user_saved_tracks()
+    for idx, item in enumerate(results['items']):
+        track = item['track']
+        print(idx, track['artists'][0]['name'], " – ", track['name'])
 
 #
 def search_aritst_top_tracks(artist):
-	results = sp.artist_top_tracks(artist)
-	msg = ""
-	tracklist = []
-	for track in results['tracks'][:10]:
-		msg = msg+track['name']+'\n'
-		print(track['name'])
-		tracklist.append(track['uri'])
-	return tracklist
+    results = sp.artist_top_tracks(artist)
+    msg = ""
+    tracklist = []
+    for track in results['tracks'][:10]:
+        msg = msg+track['name']+'\n'
+        print(track['name'])
+        tracklist.append(track['uri'])
+    return tracklist
 
 #
 def create_playlist(user_id, tracks):
-	playlist = sp.user_playlist_create(user_id, "dailyMix", public=True, collaborative=False)
-	sp.user_playlist_add_tracks(user_id, playlist['id'], tracks)
-	return playlist
+    playlist = sp.user_playlist_create(user_id, "dailyMix", public=True, collaborative=False)
+    sp.user_playlist_add_tracks(user_id, playlist['id'], tracks)
+    return playlist
 
 #
 def search(search_str, type):
-	result = sp.search(search_str, type=type)
-	return result
+    result = sp.search(search_str, type=type)
+    return result
 
 def search_artist(artist_id):
-	result = sp.artist(artist_id)
+    result = sp.artist(artist_id)
 
 #
 def get_categories(options):
-	result = sp.categories(limit=50, country='US')['categories']['items']
-	info = []
-	count = 0;
-	for c in result:
-		id = c['id']
-		if options.count(id) > 0:
-			info.append(c)
-			count+=1
-		if count == len(options): break
+    result = sp.categories(limit=50, country='US')['categories']['items']
+    info = []
+    count = 0;
+    for c in result:
+        id = c['id']
+        if options.count(id) > 0:
+            info.append(c)
+            count+=1
+        if count == len(options): break
 
-	return info
+    return info
 
 #
 def get_catagory_playlists(category):
-	result = sp.category_playlists(category, country='US')
-	list_ids = []
-	for playlist in result['playlists']['items']:
-		list_ids.append(playlist['id'])
-	return list_ids
+    result = sp.category_playlists(category, country='US')
+    list_ids = []
+    for playlist in result['playlists']['items']:
+        list_ids.append(playlist['id'])
+    return list_ids
 
 #
 def get_playlist_tracks(playlist):
-	result = sp.playlist(playlist, fields='tracks')['tracks']['items']
-	tracks = []
-	for item in result:
-		tracks.append(item['track']['uri'])
-	return tracks
+    result = sp.playlist(playlist, fields='tracks')['tracks']['items']
+    tracks = []
+    for item in result:
+        tracks.append(item['track']['uri'])
+    return tracks
 
 if __name__ == '__main__':
-	result = sp.categories()
+    result = sp.categories()
