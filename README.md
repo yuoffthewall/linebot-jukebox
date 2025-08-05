@@ -11,6 +11,12 @@ A Line bot based on a finite state machine
 
 More details in the [Slides](https://hackmd.io/@TTW/ToC-2019-Project#) and [FAQ](https://hackmd.io/s/B1Xw7E8kN)
 
+## Demo
+![step1](./img/step1.png)
+![step2](./img/step2.png)
+![step3](./img/step3.png)
+![step4](./img/step4.png)
+
 ## Setup
 
 ### Prerequisite
